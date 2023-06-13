@@ -23,7 +23,7 @@ const IntersectionPreview = () => {
 		})
 		console.log(selectedSourceData.artists)
 		const allArtists = await fetch(
-			"http://localhost:3001/getAllSongsForArtistsFromArtists",
+			"http://3.86.96.211:8080/getAllSongsForArtistsFromArtists",
 			{
 				method: "POST",
 				body: body,
@@ -55,7 +55,7 @@ const IntersectionPreview = () => {
 			artists: artistIds,
 		})
 		const allArtists = await fetch(
-			"http://localhost:3001/getAllSongsForArtistsFromArtists",
+			"http://3.86.96.211:8080/getAllSongsForArtistsFromArtists",
 			{
 				method: "POST",
 				body: body,
@@ -79,7 +79,7 @@ const IntersectionPreview = () => {
 	const getArtistsFromGenres = useCallback(async () => {
 		const body = JSON.stringify({ genres: selectedSourceData.genres })
 		const allArtists = await fetch(
-			"http://localhost:3001/getAllSongsForArtistsFromGenre",
+			"http://3.86.96.211:8080/getAllSongsForArtistsFromGenre",
 			{
 				method: "POST",
 				body: body,

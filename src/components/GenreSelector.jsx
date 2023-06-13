@@ -76,7 +76,7 @@ const GenreSelector = () => {
 	// ^^^^^^^^^^^^^^^ no clue what this shit does ^^^^^^^^^^^^^^^
 
 	const fetchGenres = async () => {
-		const allGenres = await fetch("http://localhost:3001/getGenres")
+		const allGenres = await fetch("http://3.86.96.211:8080/getGenres")
 		const allGenresJson = await allGenres.json()
 		const mapped = allGenresJson.body.map((genre) => {
 			return { key: genre, name: genre }

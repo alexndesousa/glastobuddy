@@ -19,7 +19,7 @@ const GlastoArtists = () => {
 	}
 
 	const fetchGlastoArtists = async () => {
-		const allArtists = await fetch("http://localhost:3001/getLineup")
+		const allArtists = await fetch("http://3.86.96.211:8080/getLineup")
 		const allArtistsJson = await allArtists.json()
 		const mapped = allArtistsJson.body.map((artist) => {
 			return { key: artist, name: artist }
