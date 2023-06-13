@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/glastobuddy/static/css/main.073c9b0a.css",
-    "main.js": "/glastobuddy/static/js/main.ffa22538.js",
+    "main.js": "/glastobuddy/static/js/main.47c319e8.js",
     "static/media/placeholder.jpg": "/glastobuddy/static/media/placeholder.14f41076d7d9bbf6a493.jpg",
     "index.html": "/glastobuddy/index.html",
     "main.073c9b0a.css.map": "/glastobuddy/static/css/main.073c9b0a.css.map",
-    "main.ffa22538.js.map": "/glastobuddy/static/js/main.ffa22538.js.map"
+    "main.47c319e8.js.map": "/glastobuddy/static/js/main.47c319e8.js.map"
   },
   "entrypoints": [
     "static/css/main.073c9b0a.css",
-    "static/js/main.ffa22538.js"
+    "static/js/main.47c319e8.js"
   ]
 }
