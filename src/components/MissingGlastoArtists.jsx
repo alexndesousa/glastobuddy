@@ -3,7 +3,7 @@ import { Button, Modal, Table, Input, Tooltip, Space } from "antd"
 import { UserContext } from "../App"
 import { CloudSyncOutlined } from "@ant-design/icons"
 
-const GlastoArtists = () => {
+const MissingGlastoArtists = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false)
 	const [allArtists, setAllArtists] = useState([])
 	const [tableData, setTableData] = useState([])
@@ -20,7 +20,7 @@ const GlastoArtists = () => {
 
 	const fetchGlastoArtists = async () => {
 		const allArtists = await fetch(
-			"https://api.glastobuddy.com:8080/getLineup"
+			"https://api.glastobuddy.com:8080/missingLineup"
 		)
 		const allArtistsJson = await allArtists.json()
 		const mapped = allArtistsJson.body.map((artist) => {
@@ -43,10 +43,10 @@ const GlastoArtists = () => {
 	return (
 		<>
 			<Button type="primary" onClick={showModal}>
-				Glastonbury Lineup
+				Preview missing artists
 			</Button>
 			<Modal
-				title="Glastonbury Lineup"
+				title="Missing Lineup"
 				open={isModalOpen}
 				onOk={closeModal}
 				onCancel={closeModal}
@@ -93,4 +93,4 @@ const GlastoArtists = () => {
 	)
 }
 
-export default GlastoArtists
+export default MissingGlastoArtists

@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from "react"
 import { Row, Space, Radio } from "antd"
 import CustomCard from "./CustomCard"
 import { UserContext } from "../App"
+import MissingGlastoArtists from "./MissingGlastoArtists"
 
 const ArtistFilterSelector = () => {
 	const {
@@ -26,6 +27,7 @@ const ArtistFilterSelector = () => {
 
 	return (
 		<CustomCard>
+			<MissingGlastoArtists />
 			<Row justify="center" align="middle" style={{ paddingTop: "35vh" }}>
 				<Radio.Group
 					buttonStyle="solid"
@@ -44,11 +46,6 @@ const ArtistFilterSelector = () => {
 						</Radio.Button>
 					</Space>
 				</Radio.Group>
-				{/* <Space direction="vertical">
-					<TopArtistSelector />
-					<PlaylistSelector />
-					<GenreSelector />
-				</Space> */}
 			</Row>
 		</CustomCard>
 	)
