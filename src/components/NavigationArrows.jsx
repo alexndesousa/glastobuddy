@@ -1,7 +1,8 @@
 import React, { useContext } from "react"
 import { UserContext } from "../App"
-import { Button, Row, Col } from "antd"
+import { Button, Row, Col, Image } from "antd"
 import { LeftOutlined, RightOutlined } from "@ant-design/icons"
+import buddy from "../images/buddy.png"
 
 const NavigationArrows = () => {
 	const { currentPage, setCurrentPage, isNextAllowed } =
@@ -26,7 +27,10 @@ const NavigationArrows = () => {
 					onClick={prev}
 				/>
 			</Col>
-			<Col span={4} offset={8}>
+			<Col span={4} offset={2}>
+				<Image src={buddy} preview={false} height={40} />
+			</Col>
+			<Col span={4} offset={2}>
 				<Button
 					style={{ background: "#E5D3B3" }}
 					icon={<RightOutlined />}
