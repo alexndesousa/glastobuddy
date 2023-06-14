@@ -24,30 +24,47 @@ export const getUsersTopArtists = async (header, timeRange) => {
 //playlists already stored in setUsersPlaylists
 // setSelectedSourceData({ playlists: selectedRowKeys }) <- selectedRowKeys is the href
 
-export const getArtistsFromPlaylist = async (header, playlist) => {
+export const getArtistsFromPlaylist = async (
+	header,
+	playlist,
+	setIntersectionTableProgress,
+	overallPercentage
+) => {
 	let res = await fetch(`${playlist}?limit=50`, { headers: header }) // items stores data. //next is next link
 	let resJson = await res.json()
-	let allArtists = await resJson.items.map(({ track: { artists } }) =>
+	const total = resJson?.total
+	const percentageIncrease = Math.floor(overallPercentage / (total / 50))
+	let allArtists = await resJson?.items?.map(({ track: { artists } }) =>
 		artists.map(({ href }) => href)
 	)
-	while (resJson.next) {
-		console.log(allArtists)
+	while (resJson?.next) {
 		res = await fetch(resJson.next, { headers: header })
 		resJson = await res.json()
 		allArtists = await allArtists.concat(
-			resJson.items.map(({ track: { artists } }) =>
+			resJson?.items?.map(({ track: { artists } }) =>
 				artists.map(({ href }) => href)
 			)
 		)
-		await new Promise((resolve) => setTimeout(resolve, 700))
+		setIntersectionTableProgress((current) => current + percentageIncrease)
+		await new Promise((resolve) => setTimeout(resolve, 400))
 	}
 	return await allArtists.flat()
 }
 
-export const getAllArtistsFromPlaylists = async (header, playlists) => {
+export const getAllArtistsFromPlaylists = async (
+	header,
+	playlists,
+	setIntersectionTableProgress
+) => {
+	const overallPercentage = Math.floor(80 / playlists.length)
 	let allArtists = []
-	for (const playlist of playlists) {
-		const artists = await getArtistsFromPlaylist(header, playlist)
+	for await (const playlist of playlists) {
+		const artists = await getArtistsFromPlaylist(
+			header,
+			playlist,
+			setIntersectionTableProgress,
+			overallPercentage
+		)
 		allArtists = allArtists.concat(artists)
 	}
 	return allArtists

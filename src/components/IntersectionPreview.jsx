@@ -1,6 +1,12 @@
-import React, { useContext, useEffect, useState, useCallback } from "react"
+import React, {
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+	useRef,
+} from "react"
 import { UserContext } from "../App"
-import { Row, Table, Image, Button } from "antd"
+import { Row, Table, Image, Button, Progress } from "antd"
 import CustomCard from "./CustomCard"
 import placeholder from "../images/placeholder.jpg"
 import {
@@ -8,6 +14,7 @@ import {
 	addSongsToPlaylist,
 	getAllArtistsFromPlaylists,
 } from "../services/DiscoveryService"
+import { chunkArray } from "../utils/utils"
 
 const IntersectionPreview = () => {
 	const [tableData, setTableData] = useState([])
@@ -15,90 +22,124 @@ const IntersectionPreview = () => {
 	const [isTableLoading, setIsTableLoading] = useState(true)
 	const [isCreateloading, setIsCreateLoading] = useState(false)
 	const [playlistCreated, setPlaylistCreated] = useState(false)
-	const { authHeader, selectedSourceData, userId } = useContext(UserContext)
+	const [intersectionTableProgress, setIntersectionTableProgress] =
+		useState(0)
+	const hasFetchedData = useRef(false)
+	const { authHeader, selectedSourceData, userId, setIsNextAllowed } =
+		useContext(UserContext)
 
-	const getArtistsFromArtists = useCallback(async () => {
-		const body = JSON.stringify({
-			artists: selectedSourceData.artists,
-		})
-		console.log(selectedSourceData.artists)
-		const allArtists = await fetch(
-			"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromArtists",
-			{
-				method: "POST",
-				body: body,
-				headers: { "Content-Type": "application/json" },
-			}
-		)
-		const allArtistsJson = await allArtists.json()
-		const mappedTableData = await allArtistsJson.body.artists
-			.map((artist) => {
-				return {
-					key: artist.name,
-					...artist,
-					genres: artist.genres.join(", "),
-				}
+	const getArtistsFromArtists = useCallback(
+		async (setIntersectionTableProgress) => {
+			setIntersectionTableProgress(10)
+			const body = JSON.stringify({
+				artists: selectedSourceData.artists,
 			})
-			.sort(({ followers: a }, { followers: b }) => b - a)
-		setTableData(mappedTableData)
-		setAllSongIds(allArtistsJson.body.songs)
-	}, [selectedSourceData])
+			setIntersectionTableProgress(15)
+			const allArtists = await fetch(
+				"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromArtists",
+				{
+					method: "POST",
+					body: body,
+					headers: { "Content-Type": "application/json" },
+				}
+			)
+			setIntersectionTableProgress(60)
+			const allArtistsJson = await allArtists.json()
+			setIntersectionTableProgress(70)
+			const mappedTableData = await allArtistsJson.body.artists
+				.map((artist) => {
+					return {
+						key: artist.name,
+						...artist,
+						genres: artist.genres.join(", "),
+					}
+				})
+				.sort(({ followers: a }, { followers: b }) => b - a)
+			setIntersectionTableProgress(85)
+			setTableData(mappedTableData)
+			setAllSongIds(allArtistsJson.body.songs)
+		},
+		[selectedSourceData]
+	)
 
-	const getArtistsFromPlaylists = useCallback(async () => {
-		const artistIds = await getAllArtistsFromPlaylists(
-			authHeader,
-			selectedSourceData.playlists
-		)
-		console.log("artistids")
-		console.log(artistIds)
-		const body = JSON.stringify({
-			artists: artistIds,
-		})
-		const allArtists = await fetch(
-			"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromArtists",
-			{
-				method: "POST",
-				body: body,
-				headers: { "Content-Type": "application/json" },
+	const getArtistsFromPlaylists = useCallback(
+		async (setIntersectionTableProgress) => {
+			const artistIds = await getAllArtistsFromPlaylists(
+				authHeader,
+				selectedSourceData.playlists,
+				setIntersectionTableProgress
+			)
+			const chunkedIds = chunkArray(artistIds, 800) // lets do lots of 800
+			let allArtists = []
+			let allSongs = []
+			const percentageIncrease = 15 / chunkedIds.length
+			for await (const chunk of chunkedIds) {
+				const body = JSON.stringify({
+					artists: chunk,
+				})
+				const artists = await fetch(
+					"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromArtists",
+					{
+						method: "POST",
+						body: body,
+						headers: { "Content-Type": "application/json" },
+					}
+				)
+				const artistsJson = await artists.json()
+				allArtists = allArtists.concat(artistsJson.body.artists)
+				allSongs = allSongs.concat(artistsJson.body.songs)
+				setIntersectionTableProgress(
+					(current) => current + percentageIncrease
+				)
 			}
-		)
-		const allArtistsJson = await allArtists.json()
-		const mappedTableData = await allArtistsJson.body.artists
-			.map((artist) => {
-				return {
-					key: artist.name,
-					...artist,
-					genres: artist.genres.join(", "),
-				}
-			})
-			.sort(({ followers: a }, { followers: b }) => b - a)
-		setTableData(mappedTableData)
-		setAllSongIds(allArtistsJson.body.songs)
-	}, [selectedSourceData, authHeader])
+			const mappedTableData = allArtists
+				.map((artist) => {
+					return {
+						key: artist.name,
+						...artist,
+						genres: artist.genres.join(", "),
+					}
+				})
+				.sort(({ followers: a }, { followers: b }) => b - a)
+			setIntersectionTableProgress(98)
+			setTableData(mappedTableData)
+			setAllSongIds(allSongs)
+		},
+		[selectedSourceData, authHeader]
+	)
 
-	const getArtistsFromGenres = useCallback(async () => {
-		const body = JSON.stringify({ genres: selectedSourceData.genres })
-		const allArtists = await fetch(
-			"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromGenre",
-			{
-				method: "POST",
-				body: body,
-				headers: { "Content-Type": "application/json" },
-			}
-		)
-		const allArtistsJson = await allArtists.json()
-		const mappedTableData = await allArtistsJson.body.artists
-			.map((artist) => {
-				return {
-					key: artist.name,
-					...artist,
-					genres: artist.genres.join(", "),
+	const getArtistsFromGenres = useCallback(
+		async (setIntersectionTableProgress) => {
+			setIntersectionTableProgress(10)
+			const body = JSON.stringify({ genres: selectedSourceData.genres })
+			setIntersectionTableProgress(20)
+			const allArtists = await fetch(
+				"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromGenre",
+				{
+					method: "POST",
+					body: body,
+					headers: { "Content-Type": "application/json" },
 				}
-			})
-			.sort(({ followers: a }, { followers: b }) => b - a)
-		setTableData(mappedTableData)
-		setAllSongIds(allArtistsJson.body.songs)
-	}, [selectedSourceData])
+			)
+			setIntersectionTableProgress(25)
+			setIntersectionTableProgress(75)
+			const allArtistsJson = await allArtists.json()
+			setIntersectionTableProgress(85)
+			const mappedTableData = await allArtistsJson.body.artists
+				.map((artist) => {
+					return {
+						key: artist.name,
+						...artist,
+						genres: artist.genres.join(", "),
+					}
+				})
+				.sort(({ followers: a }, { followers: b }) => b - a)
+			setIntersectionTableProgress(95)
+			setTableData(mappedTableData)
+			setAllSongIds(allArtistsJson.body.songs)
+		},
+		[selectedSourceData]
+	)
 
 	const createAndPopulatePlaylist = async () => {
 		setIsCreateLoading(true)
@@ -109,33 +150,55 @@ const IntersectionPreview = () => {
 	}
 
 	useEffect(() => {
-		if (selectedSourceData?.artists) {
-			getArtistsFromArtists()
-		}
-		if (selectedSourceData?.genres) {
-			getArtistsFromGenres()
-		}
-		if (selectedSourceData?.playlists) {
-			getArtistsFromPlaylists()
+		if (!hasFetchedData.current) {
+			if (selectedSourceData?.artists) {
+				hasFetchedData.current = true
+				getArtistsFromArtists(setIntersectionTableProgress)
+			}
+			if (selectedSourceData?.genres) {
+				hasFetchedData.current = true
+				getArtistsFromGenres(setIntersectionTableProgress)
+			}
+			if (selectedSourceData?.playlists) {
+				hasFetchedData.current = true
+				getArtistsFromPlaylists(setIntersectionTableProgress)
+			}
 		}
 	}, [
 		getArtistsFromGenres,
 		getArtistsFromPlaylists,
 		getArtistsFromArtists,
 		selectedSourceData,
+		hasFetchedData,
 	])
 
 	useEffect(() => {
 		if (tableData.length > 0) {
 			setIsTableLoading(false)
+			setIntersectionTableProgress(100)
 		}
 	}, [tableData])
+
+	useEffect(() => {
+		setIsNextAllowed(false)
+	})
+
+	const tableLoading = {
+		spinning: isTableLoading,
+		indicator: (
+			<Progress
+				type="circle"
+				size="small"
+				percent={intersectionTableProgress}
+			/>
+		),
+	}
 
 	return (
 		<CustomCard>
 			<Row justify="center" align="middle" style={{ height: "80vh" }}>
 				<Table
-					loading={isTableLoading}
+					loading={tableLoading}
 					dataSource={tableData}
 					scroll={{ y: 500 }}
 					columns={[
