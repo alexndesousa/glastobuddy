@@ -1,4 +1,4 @@
-import { chunkArray } from "../utils/utils"
+import { chunkArray, round } from "../utils/utils"
 
 const baseUrl = "https://api.spotify.com/v1"
 
@@ -8,7 +8,7 @@ export const getUsersPlaylists = async (header, setPlaylistsTableProgress) => {
 	})
 	let resJson = await res.json()
 	const total = resJson?.total
-	const percentageIncrease = Math.floor(80 / (total / 50))
+	const percentageIncrease = round(80 / (total / 50), 2)
 	let allPlaylists = resJson.items
 	while (resJson.next) {
 		console.log(allPlaylists)
@@ -34,7 +34,7 @@ export const getUsersTopArtists = async (
 	)
 	let resJson = await res.json()
 	const total = resJson?.total
-	const percentageIncrease = Math.floor(80 / (total / 50))
+	const percentageIncrease = round(80 / (total / 50), 2)
 	let allArtists = resJson.items
 	while (resJson.next) {
 		res = await fetch(resJson.next, { headers: header })
@@ -55,10 +55,11 @@ export const getArtistsFromPlaylist = async (
 	setIntersectionTableProgress,
 	overallPercentage
 ) => {
+	console.log("called getArtistsFRomPlaylists")
 	let res = await fetch(`${playlist}?limit=50`, { headers: header }) // items stores data. //next is next link
 	let resJson = await res.json()
 	const total = resJson?.total
-	const percentageIncrease = Math.floor(overallPercentage / (total / 50))
+	const percentageIncrease = round(overallPercentage / (total / 50), 2)
 	let allArtists = await resJson?.items?.map(({ track: { artists } }) =>
 		artists.map(({ href }) => href)
 	)
@@ -81,7 +82,7 @@ export const getAllArtistsFromPlaylists = async (
 	playlists,
 	setIntersectionTableProgress
 ) => {
-	const overallPercentage = Math.floor(80 / playlists.length)
+	const overallPercentage = round(80 / playlists.length, 2)
 	let allArtists = []
 	for await (const playlist of playlists) {
 		const artists = await getArtistsFromPlaylist(

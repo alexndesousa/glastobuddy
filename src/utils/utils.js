@@ -17,3 +17,7 @@ export const generateRandomString = (length) => {
 
 	return text
 }
+
+export const round = (number, decimalPlaces) => {
+	return +(Math.round(number + "e+" + decimalPlaces) + "e-" + decimalPlaces)
+}

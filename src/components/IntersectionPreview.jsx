@@ -14,7 +14,7 @@ import {
 	addSongsToPlaylist,
 	getAllArtistsFromPlaylists,
 } from "../services/DiscoveryService"
-import { chunkArray } from "../utils/utils"
+import { chunkArray, round } from "../utils/utils"
 
 const IntersectionPreview = () => {
 	const [tableData, setTableData] = useState([])
@@ -72,7 +72,7 @@ const IntersectionPreview = () => {
 			const chunkedIds = chunkArray(artistIds, 800) // lets do lots of 800
 			let allArtists = []
 			let allSongs = []
-			const percentageIncrease = 15 / chunkedIds.length
+			const percentageIncrease = round(15 / chunkedIds.length, 2)
 			for await (const chunk of chunkedIds) {
 				const body = JSON.stringify({
 					artists: chunk,
