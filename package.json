@@ -2,7 +2,7 @@
 	"name": "glasto-helper",
 	"version": "0.1.0",
 	"private": true,
-	"homepage": "https://alexndesousa.github.io/glastobuddy",
+	"homepage": "https://glastobuddy.com",
 	"dependencies": {
 		"@ant-design/icons": "^5.1.4",
 		"@testing-library/jest-dom": "^5.16.5",
