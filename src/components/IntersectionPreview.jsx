@@ -55,9 +55,10 @@ const IntersectionPreview = () => {
 					}
 				})
 				.sort(({ followers: a }, { followers: b }) => b - a)
+			//dedupe
 			setIntersectionTableProgress(85)
-			setTableData(mappedTableData)
-			setAllSongIds(allArtistsJson.body.songs)
+			setTableData([...new Set(mappedTableData)])
+			setAllSongIds([...new Set(allArtistsJson.body.songs)])
 		},
 		[selectedSourceData]
 	)
@@ -102,8 +103,8 @@ const IntersectionPreview = () => {
 				})
 				.sort(({ followers: a }, { followers: b }) => b - a)
 			setIntersectionTableProgress(98)
-			setTableData(mappedTableData)
-			setAllSongIds(allSongs)
+			setTableData([...new Set(mappedTableData)])
+			setAllSongIds([...new Set(allSongs)])
 		},
 		[selectedSourceData, authHeader]
 	)
@@ -135,8 +136,8 @@ const IntersectionPreview = () => {
 				})
 				.sort(({ followers: a }, { followers: b }) => b - a)
 			setIntersectionTableProgress(95)
-			setTableData(mappedTableData)
-			setAllSongIds(allArtistsJson.body.songs)
+			setTableData([...new Set(mappedTableData)])
+			setAllSongIds([...new Set(allArtistsJson.body.songs)])
 		},
 		[selectedSourceData]
 	)

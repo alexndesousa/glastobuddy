@@ -28,7 +28,7 @@ const NavigationArrows = () => {
 				/>
 			</Col>
 			<Col span={4} offset={2}>
-				<Image src={buddy} preview={false} height={40} />
+				<Image src={buddy} preview={false} height={40} width={40} />
 			</Col>
 			<Col span={4} offset={2}>
 				<Button
