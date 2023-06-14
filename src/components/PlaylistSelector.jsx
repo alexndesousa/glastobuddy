@@ -1,5 +1,5 @@
-import { Image, Row, Table, Input, Checkbox } from "antd"
-import React, { useEffect, useState, useContext } from "react"
+import { Image, Row, Table, Input, Checkbox, Progress } from "antd"
+import React, { useEffect, useState, useContext, useRef } from "react"
 import { getUsersPlaylists } from "../services/DiscoveryService"
 import placeholder from "../images/placeholder.jpg"
 import { UserContext } from "../App"
@@ -10,6 +10,8 @@ const PlaylistSelector = () => {
 	const [selectedRowKeys, setSelectedRowKeys] = useState([])
 	const [isTableLoading, setIsTableLoading] = useState(true)
 	const [tableData, setTableData] = useState([])
+	const [playlistsTableProgress, setPlaylistsTableProgress] = useState(0)
+	const hasFetchedPlaylistsData = useRef(false)
 	const {
 		authHeader,
 		selectedSourceData,
@@ -35,12 +37,19 @@ const PlaylistSelector = () => {
 	}, [usersPlaylists])
 
 	useEffect(() => {
-		if (tableData.length === 0) {
-			getUsersPlaylists(authHeader).then((playlists) =>
-				setUsersPlaylists(playlists)
-			)
+		if (tableData.length === 0 && !hasFetchedPlaylistsData.current) {
+			hasFetchedPlaylistsData.current = true
+			search()
 		}
 	})
+
+	const search = async () => {
+		const playlists = await getUsersPlaylists(
+			authHeader,
+			setPlaylistsTableProgress
+		)
+		setUsersPlaylists(playlists)
+	}
 
 	useEffect(() => {
 		if (tableData.length > 0) {
@@ -99,6 +108,16 @@ const PlaylistSelector = () => {
 		columnTitle: headerCheckbox,
 	}
 	// ^^^^^^^^^^^^^^^ no clue what this shit does ^^^^^^^^^^^^^^^
+	const tableLoading = {
+		spinning: isTableLoading,
+		indicator: (
+			<Progress
+				type="circle"
+				size="small"
+				percent={playlistsTableProgress}
+			/>
+		),
+	}
 
 	const filterPlaylists = (search) => {
 		const filtered = usersPlaylists
@@ -128,10 +147,10 @@ const PlaylistSelector = () => {
 				<Input
 					type="primary"
 					onChange={filterPlaylists}
-					placeholder="Search artists"
+					placeholder="Search playlists"
 				/>
 				<Table
-					loading={isTableLoading}
+					loading={tableLoading}
 					dataSource={tableData}
 					scroll={{ y: 500 }}
 					columns={[

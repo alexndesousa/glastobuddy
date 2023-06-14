@@ -2,8 +2,8 @@ import { generateRandomString } from "../utils/utils"
 
 const authenticateUser = () => {
 	const client_id = "3b71f701222a46a680a798205c915759"
-	const redirect_uri = "https://alexndesousa.github.io/glastobuddy"
-	// const redirect_uri = "http://localhost:3000"
+	// const redirect_uri = "https://alexndesousa.github.io/glastobuddy"
+	const redirect_uri = "http://localhost:3000"
 	const scope =
 		"user-top-read user-read-private user-read-email playlist-modify-public playlist-read-private playlist-modify-private"
 	const state = generateRandomString(16)

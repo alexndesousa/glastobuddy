@@ -2,23 +2,48 @@ import { chunkArray } from "../utils/utils"
 
 const baseUrl = "https://api.spotify.com/v1"
 
-export const getUsersPlaylists = async (header) => {
-	const res = await fetch(baseUrl + "/me/playlists?limit=50", {
+export const getUsersPlaylists = async (header, setPlaylistsTableProgress) => {
+	let res = await fetch(baseUrl + "/me/playlists?limit=50", {
 		headers: header,
 	})
-	const json = await res.json()
-	return json.items
+	let resJson = await res.json()
+	const total = resJson?.total
+	const percentageIncrease = Math.floor(80 / (total / 50))
+	let allPlaylists = resJson.items
+	while (resJson.next) {
+		console.log(allPlaylists)
+		res = await fetch(resJson.next, { headers: header })
+		resJson = await res.json()
+		allPlaylists = allPlaylists.concat(resJson.items)
+		setPlaylistsTableProgress((current) => current + percentageIncrease)
+		await new Promise((resolve) => setTimeout(resolve, 400))
+	}
+	return allPlaylists
 }
 
-export const getUsersTopArtists = async (header, timeRange) => {
-	const res = await fetch(
+export const getUsersTopArtists = async (
+	header,
+	timeRange,
+	setTopArtistsTableProgress
+) => {
+	let res = await fetch(
 		baseUrl + `/me/top/artists?time_range=${timeRange}&limit=50`,
 		{
 			headers: header,
 		}
 	)
-	const json = await res.json()
-	return json.items
+	let resJson = await res.json()
+	const total = resJson?.total
+	const percentageIncrease = Math.floor(80 / (total / 50))
+	let allArtists = resJson.items
+	while (resJson.next) {
+		res = await fetch(resJson.next, { headers: header })
+		resJson = await res.json()
+		allArtists = allArtists.concat(resJson.items)
+		setTopArtistsTableProgress((current) => current + percentageIncrease)
+		await new Promise((resolve) => setTimeout(resolve, 400))
+	}
+	return allArtists
 }
 
 //playlists already stored in setUsersPlaylists

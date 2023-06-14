@@ -7,8 +7,9 @@ import {
 	Space,
 	Tooltip,
 	Checkbox,
+	Progress,
 } from "antd"
-import React, { useEffect, useState, useContext } from "react"
+import React, { useEffect, useState, useContext, useRef } from "react"
 import { getUsersTopArtists } from "../services/DiscoveryService"
 import placeholder from "../images/placeholder.jpg"
 import { UserContext } from "../App"
@@ -19,6 +20,8 @@ const TopArtistSelector = () => {
 	const [selectedRowKeys, setSelectedRowKeys] = useState([])
 	const [isTableLoading, setIsTableLoading] = useState(true)
 	const [tableData, setTableData] = useState([])
+	const [topArtistsTableProgress, setTopArtistsTableProgress] = useState(0)
+	const hasFetchedTopArtistsData = useRef(false)
 	const {
 		authHeader,
 		selectedSourceData,
@@ -76,6 +79,17 @@ const TopArtistSelector = () => {
 	}
 	// ^^^^^^^^^^^^^^^ no clue what this shit does ^^^^^^^^^^^^^^^
 
+	const tableLoading = {
+		spinning: isTableLoading,
+		indicator: (
+			<Progress
+				type="circle"
+				size="small"
+				percent={topArtistsTableProgress}
+			/>
+		),
+	}
+
 	useEffect(() => {
 		if (usersTopArtists !== []) {
 			setTableData(
@@ -92,7 +106,8 @@ const TopArtistSelector = () => {
 	}, [usersTopArtists])
 
 	useEffect(() => {
-		if (tableData.length === 0) {
+		if (tableData.length === 0 && !hasFetchedTopArtistsData.current) {
+			hasFetchedTopArtistsData.current = true
 			search("medium_term")
 		}
 	})
@@ -105,10 +120,13 @@ const TopArtistSelector = () => {
 		}
 	}, [selectedSourceData, setIsNextAllowed])
 
-	const search = (timeRange) => {
-		getUsersTopArtists(authHeader, timeRange).then((artists) => {
-			setUsersTopArtists(artists)
-		})
+	const search = async (timeRange) => {
+		const topArtists = await getUsersTopArtists(
+			authHeader,
+			timeRange,
+			setTopArtistsTableProgress
+		)
+		setUsersTopArtists(topArtists)
 	}
 
 	const filterArtists = (search) => {
@@ -156,7 +174,7 @@ const TopArtistSelector = () => {
 					</Tooltip>
 				</Space.Compact>
 				<Table
-					loading={isTableLoading}
+					loading={tableLoading}
 					dataSource={tableData}
 					scroll={{ y: 500 }}
 					columns={[

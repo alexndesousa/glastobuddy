@@ -24,7 +24,7 @@ const IntersectionPreview = () => {
 	const [playlistCreated, setPlaylistCreated] = useState(false)
 	const [intersectionTableProgress, setIntersectionTableProgress] =
 		useState(0)
-	const hasFetchedData = useRef(false)
+	const hasFetchedIntersectionData = useRef(false)
 	const { authHeader, selectedSourceData, userId, setIsNextAllowed } =
 		useContext(UserContext)
 
@@ -150,17 +150,17 @@ const IntersectionPreview = () => {
 	}
 
 	useEffect(() => {
-		if (!hasFetchedData.current) {
+		if (!hasFetchedIntersectionData.current) {
 			if (selectedSourceData?.artists) {
-				hasFetchedData.current = true
+				hasFetchedIntersectionData.current = true
 				getArtistsFromArtists(setIntersectionTableProgress)
 			}
 			if (selectedSourceData?.genres) {
-				hasFetchedData.current = true
+				hasFetchedIntersectionData.current = true
 				getArtistsFromGenres(setIntersectionTableProgress)
 			}
 			if (selectedSourceData?.playlists) {
-				hasFetchedData.current = true
+				hasFetchedIntersectionData.current = true
 				getArtistsFromPlaylists(setIntersectionTableProgress)
 			}
 		}
@@ -169,7 +169,7 @@ const IntersectionPreview = () => {
 		getArtistsFromPlaylists,
 		getArtistsFromArtists,
 		selectedSourceData,
-		hasFetchedData,
+		hasFetchedIntersectionData,
 	])
 
 	useEffect(() => {
