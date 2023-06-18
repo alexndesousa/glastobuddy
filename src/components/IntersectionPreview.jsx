@@ -63,6 +63,52 @@ const IntersectionPreview = () => {
 		[selectedSourceData]
 	)
 
+	const getArtistsFromArtistsGenres = useCallback(async () => {
+		setIntersectionTableProgress(10)
+		const bodyA = JSON.stringify({
+			artists: selectedSourceData.artists,
+		})
+		setIntersectionTableProgress(15)
+		const allArtistsA = await fetch(
+			"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromArtists",
+			{
+				method: "POST",
+				body: bodyA,
+				headers: { "Content-Type": "application/json" },
+			}
+		)
+		setIntersectionTableProgress(60)
+		const allArtistsJsonA = await allArtistsA.json()
+		const allArtistsGenres = await allArtistsJsonA.body.artists
+			.map(({ genres }) => genres)
+			.flat()
+
+		const bodyB = JSON.stringify({ genres: allArtistsGenres })
+		const allArtistsB = await fetch(
+			"https://api.glastobuddy.com:8080/getAllSongsForArtistsFromGenre",
+			{
+				method: "POST",
+				body: bodyB,
+				headers: { "Content-Type": "application/json" },
+			}
+		)
+		setIntersectionTableProgress(75)
+		const allArtistsJsonB = await allArtistsB.json()
+		setIntersectionTableProgress(85)
+		const mappedTableData = await allArtistsJsonB.body.artists
+			.map((artist) => {
+				return {
+					key: artist.name,
+					...artist,
+					genres: artist.genres.join(", "),
+				}
+			})
+			.sort(({ followers: a }, { followers: b }) => b - a)
+		setIntersectionTableProgress(95)
+		setTableData([...new Set(mappedTableData)])
+		setAllSongIds([...new Set(allArtistsJsonB.body.songs)])
+	}, [selectedSourceData])
+
 	const getArtistsFromPlaylists = useCallback(
 		async (setIntersectionTableProgress) => {
 			const artistIds = await getAllArtistsFromPlaylists(
@@ -154,7 +200,11 @@ const IntersectionPreview = () => {
 		if (!hasFetchedIntersectionData.current) {
 			if (selectedSourceData?.artists) {
 				hasFetchedIntersectionData.current = true
-				getArtistsFromArtists(setIntersectionTableProgress)
+				if (selectedSourceData?.type === "artist_name") {
+					getArtistsFromArtists(setIntersectionTableProgress)
+				} else {
+					getArtistsFromArtistsGenres(setIntersectionTableProgress)
+				}
 			}
 			if (selectedSourceData?.genres) {
 				hasFetchedIntersectionData.current = true
@@ -169,6 +219,7 @@ const IntersectionPreview = () => {
 		getArtistsFromGenres,
 		getArtistsFromPlaylists,
 		getArtistsFromArtists,
+		getArtistsFromArtistsGenres,
 		selectedSourceData,
 		hasFetchedIntersectionData,
 	])

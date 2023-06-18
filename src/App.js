@@ -50,7 +50,6 @@ const App = () => {
 						setIsAdmin(true)
 					}
 					setUserId(json.id)
-					setIsNextAllowed(true)
 				})
 		}
 	}, [authHeader])
@@ -59,6 +58,7 @@ const App = () => {
 		if (window.location.href.includes("#access_token=")) {
 			setAuthHeader(getAuthorizationHeader())
 			setShowAuth(false)
+			setIsNextAllowed(true)
 		}
 	}, [])
 

@@ -17,6 +17,7 @@ const PlaylistSelector = () => {
 		selectedSourceData,
 		setSelectedSourceData,
 		setIsNextAllowed,
+		userId,
 	} = useContext(UserContext)
 
 	useEffect(() => {
@@ -46,6 +47,7 @@ const PlaylistSelector = () => {
 	const search = async () => {
 		const playlists = await getUsersPlaylists(
 			authHeader,
+			userId,
 			setPlaylistsTableProgress
 		)
 		setUsersPlaylists(playlists)

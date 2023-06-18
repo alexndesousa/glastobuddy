@@ -2,16 +2,20 @@ import { chunkArray, round } from "../utils/utils"
 
 const baseUrl = "https://api.spotify.com/v1"
 
-export const getUsersPlaylists = async (header, setPlaylistsTableProgress) => {
-	let res = await fetch(baseUrl + "/me/playlists?limit=50", {
+export const getUsersPlaylists = async (
+	header,
+	userId,
+	setPlaylistsTableProgress
+) => {
+	let res = await fetch(baseUrl + `/users/${userId}/playlists`, {
 		headers: header,
 	})
 	let resJson = await res.json()
+	console.log(resJson)
 	const total = resJson?.total
 	const percentageIncrease = round(80 / (total / 50), 2)
 	let allPlaylists = resJson.items
 	while (resJson.next) {
-		console.log(allPlaylists)
 		res = await fetch(resJson.next, { headers: header })
 		resJson = await res.json()
 		allPlaylists = allPlaylists.concat(resJson.items)
@@ -55,7 +59,6 @@ export const getArtistsFromPlaylist = async (
 	setIntersectionTableProgress,
 	overallPercentage
 ) => {
-	console.log("called getArtistsFRomPlaylists")
 	let res = await fetch(`${playlist}?limit=50`, { headers: header }) // items stores data. //next is next link
 	let resJson = await res.json()
 	const total = resJson?.total

@@ -18,6 +18,7 @@ import CustomCard from "./CustomCard"
 const TopArtistSelector = () => {
 	const [usersTopArtists, setUsersTopArtists] = useState([])
 	const [selectedRowKeys, setSelectedRowKeys] = useState([])
+	const [topArtistType, setTopArtistType] = useState("artist_name")
 	const [isTableLoading, setIsTableLoading] = useState(true)
 	const [tableData, setTableData] = useState([])
 	const [topArtistsTableProgress, setTopArtistsTableProgress] = useState(0)
@@ -37,9 +38,12 @@ const TopArtistSelector = () => {
 
 	useEffect(() => {
 		if (selectedRowKeys.length > 0) {
-			setSelectedSourceData({ artists: selectedRowKeys })
+			setSelectedSourceData({
+				artists: selectedRowKeys,
+				type: topArtistType,
+			})
 		}
-	}, [selectedRowKeys, setSelectedSourceData])
+	}, [selectedRowKeys, setSelectedSourceData, topArtistType])
 
 	// vvvvvvvvvvvvvvv no clue what this shit does vvvvvvvvvvvvvvv
 	const handleSelect = (record, selected) => {
@@ -172,6 +176,14 @@ const TopArtistSelector = () => {
 							]}
 						/>
 					</Tooltip>
+					<Select
+						defaultValue="artist_name"
+						onChange={(value) => setTopArtistType(value)}
+						options={[
+							{ value: "artist_name", label: "name" },
+							{ value: "artist_genres", label: "genres" },
+						]}
+					/>
 				</Space.Compact>
 				<Table
 					loading={tableLoading}
